@@ -6,7 +6,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 
-public class ReducerBoughtTogether extends Reducer<Text, IntWritable, Text, IntWritable> {
+public class ReducerBoughtTogether2 extends Reducer<Text, IntWritable, Text, IntWritable> {
 
     private TopKVector<WordCountWritable> topK;
 
@@ -21,15 +21,8 @@ public class ReducerBoughtTogether extends Reducer<Text, IntWritable, Text, IntW
 
     @Override
     protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
-        int occurrences = 0;
-
-        // Count occurrences
-        for (IntWritable i : values) {
-            occurrences = occurrences + i.get();
-        }
-
-        // Update the top-K
-        topK.updateWithNewElement(new WordCountWritable(key.toString(), occurrences));
+        // Insert into the top-K
+        topK.updateWithNewElement(new WordCountWritable(key.toString(), values.iterator().next().get()));
     }
 
     @Override
