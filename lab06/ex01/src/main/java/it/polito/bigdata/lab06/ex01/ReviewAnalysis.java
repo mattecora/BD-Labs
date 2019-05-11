@@ -27,21 +27,23 @@ public class ReviewAnalysis {
         JavaRDD<String> input = sc.textFile(inputPath);
 
         // Transpose the dataset
-        JavaPairRDD<String, Iterable<String>> pairs = input
+        JavaPairRDD<String, String> pairs = input
             .filter(s -> !s.startsWith("Id"))
             .mapToPair(s -> new Tuple2<>(s.split(",")[2], s.split(",")[1]))
-            .groupByKey();
+            .reduceByKey((p1, p2) -> p1 + "," + p2);
         
         // Count the frequencies of pairs of products
         JavaPairRDD<String, Integer> frequencies = pairs
             .values()
             .flatMapToPair(l -> {
+                String[] tokens = l.split(",");
                 List<Tuple2<String, Integer>> productPairs = new ArrayList<>();
 
-                for (String p1 : l) {
-                    for (String p2 : l) {
-                        if (p1 != p2 && !productPairs.contains(new Tuple2<>(p2 + "," + p1, 1)))
-                            productPairs.add(new Tuple2<>(p1 + "," + p2, 1));
+                for (int i = 0; i < tokens.length; i++) {
+                    for (int j = i + 1; j < tokens.length; j++) {
+                        Tuple2<String, Integer> pair = new Tuple2<>(tokens[i] + "," + tokens[j], 1);
+                        if (!productPairs.contains(pair))
+                            productPairs.add(pair);
                     }
                 }
 
