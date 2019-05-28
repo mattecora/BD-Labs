@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 
 import org.apache.spark.api.java.function.FilterFunction;
 import org.apache.spark.api.java.function.MapFunction;
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.RelationalGroupedDataset;
@@ -50,7 +51,6 @@ public class BikeSharingAnalysis {
             e.setHours(hours);
             e.setUsedSlots(r.getInt(2));
             e.setFreeSlots(r.getInt(3));
-            e.setCritical(r.getInt(3) == 0 ? 1 : 0);
 
             return e;
         }, Encoders.bean(Entry.class))
@@ -61,7 +61,7 @@ public class BikeSharingAnalysis {
 
         // Compute criticality
         Dataset<CriticalityEntry> registerWithCriticality = groupedRegister.agg(
-            sum("critical")
+            count(when(col("freeSlots").equalTo(0), 1))
             .divide(count("*"))
             .alias("criticality")
         ).filter((FilterFunction<Row>) r -> r.getDouble(3) > threshold)
@@ -84,7 +84,7 @@ public class BikeSharingAnalysis {
         
         // Sort the resulting dataset and select only interesting columns
         Dataset<Row> sortedJoinedDatasets = joinedDatasets
-            .sort("criticality", "station", "dayOfTheWeek", "hours")
+            .sort(new Column("criticality").desc(), new Column("station").asc(), new Column("dayOfTheWeek").asc(), new Column("hours").asc())
             .select("station", "dayOfTheWeek", "hours", "criticality", "longitude", "latitude");
         
         // Store the result

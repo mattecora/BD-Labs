@@ -7,7 +7,7 @@ public class Entry implements Serializable {
     
     private Integer station;
     private String dayOfTheWeek;
-    private Integer hours, usedSlots, freeSlots, critical;
+    private Integer hours, usedSlots, freeSlots;
 
     public Integer getStation() {
         return station;
@@ -47,13 +47,5 @@ public class Entry implements Serializable {
 
     public void setFreeSlots(Integer freeSlots) {
         this.freeSlots = freeSlots;
-    }
-
-    public Integer getCritical() {
-        return critical;
-    }
-
-    public void setCritical(Integer critical) {
-        this.critical = critical;
     }
 }

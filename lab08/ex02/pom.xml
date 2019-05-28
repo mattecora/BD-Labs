@@ -3,11 +3,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>it.polito.bigdata.lab08.ex01</groupId>
-    <artifactId>Lab08Ex01</artifactId>
+    <groupId>it.polito.bigdata.lab08.ex02</groupId>
+    <artifactId>Lab08Ex02</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>Lab 8.1 - Analysis of a bike sharing dataset using Spark SQL</name>
+    <name>Lab 8.2 - Analysis of a bike sharing dataset using Spark SQL</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
