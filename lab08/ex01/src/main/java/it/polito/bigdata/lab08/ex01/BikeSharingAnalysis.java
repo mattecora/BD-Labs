@@ -51,22 +51,20 @@ public class BikeSharingAnalysis {
             e.setHours(hours);
             e.setUsedSlots(r.getInt(2));
             e.setFreeSlots(r.getInt(3));
+            e.setCritical(e.getFreeSlots() == 0 ? 1 : 0);
 
             return e;
         }, Encoders.bean(Entry.class))
-        .filter((FilterFunction<Entry>) e -> !(e.getUsedSlots() == 0 && e.getFreeSlots() == 0));;
+        .filter((FilterFunction<Entry>) e -> !(e.getUsedSlots() == 0 && e.getFreeSlots() == 0));
 
         // Group by station and timeslot
         RelationalGroupedDataset groupedRegister = registerDataset.groupBy("station", "dayOfTheWeek", "hours");
 
         // Compute criticality
         Dataset<CriticalityEntry> registerWithCriticality = groupedRegister.agg(
-            count(when(col("freeSlots").equalTo(0), 1))
-            .divide(count("*"))
-            .alias("criticality")
-        ).filter((FilterFunction<Row>) r -> r.getDouble(3) > threshold)
+            sum("critical").divide(count("*")).alias("criticality"))
+        .filter((FilterFunction<Row>) r -> r.getDouble(3) > threshold)
         .as(Encoders.bean(CriticalityEntry.class));
-
         // Create the stations Dataframe
         Dataset<Row> stationsDataframe = ss.read()
             .format("csv")

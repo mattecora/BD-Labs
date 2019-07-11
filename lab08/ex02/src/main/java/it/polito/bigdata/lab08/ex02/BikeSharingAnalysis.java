@@ -1,9 +1,12 @@
 package it.polito.bigdata.lab08.ex02;
 
+import java.sql.Timestamp;
+
 import org.apache.spark.sql.AnalysisException;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataTypes;
 
 public class BikeSharingAnalysis {
 
@@ -18,6 +21,7 @@ public class BikeSharingAnalysis {
         // Create the Spark session
         SparkSession ss = SparkSession.builder()
             .appName("Lab 8.2 - Analysis of a bike sharing dataset using Spark SQL")
+            .master("local")
             .getOrCreate();
 
         // Create the input Dataframe
@@ -27,6 +31,10 @@ public class BikeSharingAnalysis {
             .option("inferSchema", true)
             .option("header", true)
             .load(registerFile);
+    
+        // Define UDFs
+        ss.udf().register("critical", (Integer freeSlots) -> freeSlots == 0 ? 1 : 0, DataTypes.IntegerType);
+        ss.udf().register("dayofweeknamed", (Timestamp date) -> DateTool.dayOfTheWeek(date.toString()), DataTypes.StringType);
         
         // Create temporary view
         try {
@@ -37,8 +45,8 @@ public class BikeSharingAnalysis {
 
         // Run SQL code to compute criticality
         Dataset<Row> registerWithCriticality = ss.sql(
-            "SELECT station, dayofweek(timestamp) as dayoftheweek, hour(timestamp) as hours," +
-            " count(CASE WHEN (free_slots = 0) THEN 1 END) / count(*) as criticality" +
+            "SELECT station, dayofweeknamed(timestamp) as dayoftheweek, hour(timestamp) as hours," +
+            " sum(critical(free_slots)) / count(*) as criticality" +
             " FROM register" +
             " WHERE NOT (free_slots = 0 AND used_slots = 0)" +
             " GROUP BY station, dayoftheweek, hours" +
