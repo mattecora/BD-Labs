@@ -19,7 +19,7 @@ public class HashtagCount {
         String outputPath = args[1];
 
         // Create the Spark configuration
-        SparkConf conf = new SparkConf().setMaster("local[2]").setAppName("Lab 10.1 - Hashtag count with Spark Streaming");
+        SparkConf conf = new SparkConf().setAppName("Lab 10.1 - Hashtag count with Spark Streaming");
         
         // Open the streaming context
         JavaStreamingContext sc = new JavaStreamingContext(conf, Durations.seconds(10));
